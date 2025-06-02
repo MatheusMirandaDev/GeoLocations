@@ -1,0 +1,17 @@
+﻿version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:16-3.4 # Versão do PostGIS baseada no PostgreSQL 16
+    restart: always
+    environment:
+      POSTGRES_DB: geoLocations_db # Nome do seu banco de dados
+      POSTGRES_USER: root     # Seu usuário do banco de dados
+      POSTGRES_PASSWORD: root@123 # Sua senha do banco de dados
+    ports:
+      - "5432:5432" # Mapeia a porta 5432 do host para a porta 5432 do contêiner
+    volumes:
+      - db_data:/var/lib/postgresql/data # Volume persistente para os dados
+
+volumes:
+  db_data:
