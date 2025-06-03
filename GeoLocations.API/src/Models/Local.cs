@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace GeoLocations.API.src.Models;
 
 /// <summary>
-/// Representa as categorias de locais disponíveis.
+/// Representa as categorias de locais disponíveis. | 0 - Farmácias | 1 - Restaurantes | 2 - Hospitais | 3 - Supermercados | 4 - Postos de Combustível | 5 - Escolas | 6 - Parques | 7 - Shoppings | 8 - Outros.|
 /// </summary>
 public enum CategoriaLocal
 {
