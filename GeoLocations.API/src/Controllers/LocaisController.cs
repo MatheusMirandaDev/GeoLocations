@@ -32,8 +32,8 @@ public class LocaisController : ControllerBase
     /// Cria um novo local geográfico.
     /// </summary>
     /// <param name="localDto">Dados do local a ser criado</param>
-    /// <returns>Retorma o local criado</returns>
-    /// <response code="201">Local criado com sucesso.</response>
+    /// <returns>Retorna o local criado</returns>
+    /// <response code="201">Local criado com sucesso e retornado no corpo da resposta.</response>
     /// <response code="400">Erro ao tentar criar, dados inválidos.</response>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -58,10 +58,10 @@ public class LocaisController : ControllerBase
     /// Mostra a lista com todos os locais geográficos cadastrados.
     /// </summary>
     /// <returns>Retorna todos os locais geográficos cadastrados </returns>
-    /// <response code="200">Lista de locais geográficos retornada com sucesso.</response>
+    /// <response code="200">Lista a lista com todos os locais geográficos cadastrados.</response>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<LocalResponseDto>>> GetAllLocais() 
+    public async Task<ActionResult<IEnumerable<LocalResponseDto>>> GetAllLocais()
     {
         var locais = await _dbContext.Locais.ToListAsync(); // Busca todos os locais do banco de dados
         return _mapper.Map<List<LocalResponseDto>>(locais); // Mapeia a lista de locais para DTOs de resposta
@@ -72,19 +72,68 @@ public class LocaisController : ControllerBase
     /// </summary>
     /// <param name="id"> Identificador do local geográfico </param>
     /// <returns> Retorna o local geografico referente ao ID</returns>
+    /// <response code="200">Local encontrado com sucesso e retornado no corpo da resposta.</response>
+    /// <response code="404">Local não encontrado</response>
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<LocalResponseDto>> GetLocalById(int id) 
+    public async Task<ActionResult<LocalResponseDto>> GetLocalById(int id)
     {
-        var local = await _dbContext.Locais.FirstOrDefaultAsync(l => l.Id == id); // Busca o local pelo ID no banco de dados
-        if (local == null)
-        {
-            return NotFound();
-        }
+        var local = await _dbContext.Locais.AsNoTracking() // Desabilita o rastreamento de alterações para melhorar a performance
+            .FirstOrDefaultAsync(l => l.Id == id); // Busca o local pelo ID no banco de dados
+
+        if (local == null) return NotFound();
 
         var response = _mapper.Map<LocalResponseDto>(local); // Mapeia o local encontrado para o DTO de resposta
 
         return Ok(response);
+    }
+
+    /// <summary>
+    /// Atualiza um local geográfico existente pelo seu ID.
+    /// </summary>
+    /// <param name="id"> Identificador do local geográfico </param>
+    /// <param name="localDto"> Dados do local a ser atualizado</param>
+    /// <returns>Retorna o local atualizado</returns>
+    /// <response code="200">Local atualizado com sucesso e retornado no corpo da resposta.</response>
+    /// <response code="400">Erro ao tentar atualizar local, dados inválidos.</response>
+    /// <response code="404">Local não encontrado</response>
+    [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateLocal(int id, [FromBody] UpdateLocalDto localDto) 
+    {
+        // Busca o local pelo ID no banco de dados
+        var local = await _dbContext.Locais.FindAsync(id); 
+
+        if (local == null) return NotFound();
+
+        _mapper.Map(localDto, local); // Mapeia os dados do DTO para a entidade Local existente
+        await _dbContext.SaveChangesAsync(); // Salva as alterações no banco de dados
+        var responseDto = _mapper.Map<LocalResponseDto>(local); // Mapeia o local atualizado para o DTO de resposta
+        return Ok(responseDto);
+    }
+
+
+    /// <summary>
+    /// Exclui um local geográfico existente pelo seu ID.
+    /// </summary>
+    /// <param name="id"> Identificador do local geográfico </param>
+    /// <returns>  Retorna um 204 No Content sinalizando que a exclusão foi concluida com sucesso</returns>
+    /// <response code="204">Local excluído com sucesso.</response>
+    /// <response code="404">Local não encontrado</response>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteLocal(int id)
+    {
+        var local = await _dbContext.Locais.FindAsync(id);
+
+        if (local == null) return NotFound();
+
+        _dbContext.Locais.Remove(local); // Remove o local do contexto do banco de dados
+        await _dbContext.SaveChangesAsync(); // Salva as alterações no banco de dados
+        return NoContent(); // Retorna 204 No Content indicando que a operação foi bem-sucedida, mas não há conteúdo para retornar
     }
 }
