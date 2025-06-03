@@ -21,7 +21,7 @@ public class GeoLocationsContext : DbContext
     /// Define a tabela Locais no contexto do banco de dados.
     /// O DbSet permite realizar operações CRUD na tabela Locais.
     /// </summary>
-    public DbSet<Locais> Locais { get; set; }
+    public DbSet<Local> Locais { get; set; }
 
     /// <summary>
     /// Método responsavel por configurar o modelo do Entity Framework Core.
@@ -37,7 +37,7 @@ public class GeoLocationsContext : DbContext
         modelBuilder.HasPostgresExtension("postgis");
 
         // Configura a entidade Locais para usar o tipo de dados geográfico do PostGIS.
-        modelBuilder.Entity<Locais>().Property(l => l.Coordenada)
+        modelBuilder.Entity<Local>().Property(l => l.Coordenada)
             .HasColumnType("geography(Point, 4326)"); 
     }
 }

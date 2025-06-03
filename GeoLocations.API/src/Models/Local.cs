@@ -31,7 +31,7 @@ public enum CategoriaLocal
 /// <summary>
 /// Representa um local geográfico com suas propriedades e categoria.
 /// </summary>
-public class Locais
+public class Local
 {
     /// <summary>
     /// Identificador único do local.
