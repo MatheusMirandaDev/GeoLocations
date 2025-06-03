@@ -1,7 +1,11 @@
+using AutoMapper;
+using GeoLocations.API.src.DataAccess;
+using GeoLocations.API.src.Profiles;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite;
-using GeoLocations.API.src.DataAccess;
+using System.Reflection;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,12 +21,52 @@ builder.Services.AddDbContext<GeoLocationsContext>(options =>
     x => x.UseNetTopologySuite())
 );
 
+builder.Services.AddAutoMapper(typeof(LocalProfile));
+
 // Adiciona os serviços dos controllers (endpoints)
 builder.Services.AddControllers();
 
 // Confiura o uso do Swagger/OpenAPI 
 builder.Services.AddEndpointsApiExplorer(); // Permite que o Swagger descubra os endpoints
-builder.Services.AddSwaggerGen(); // Gera a documentação Swagger
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc(
+        "v1",
+        new OpenApiInfo
+        {
+            Version = "v1",
+            Title = "API de Gerenciador de Locais Geográficos",
+            Description = """
+                    API REST desenvolvida em .NET 8 (C#) utilizando PostgreSQL com PostGIS via Docker para gerenciar locais geográficos em uma cidade.
+
+                    A API permite:
+
+                    - Criar um local informando nome, categoria e coordenadas (latitude/longitude).
+                    - Listar todos os locais cadastrados, além de existir um endpoint para retornar esses locais no formato GeoJSON.
+                    - Buscar um local específico pelo seu ID.
+                    - Atualizar os dados de um local já cadastrado.
+                    - Excluir um local específico pelo seu ID.
+
+                    As cordenadas são armazenadas no formato Point (SRID 4326) utilizando o NetTopologySuite, que é compatível com o PostgreSQL/PostGIS.
+                    """,
+            Contact = new OpenApiContact
+            {
+                Name = "Matheus Miranda Batista",
+                Email = "matheusmiranda.batista@gmail.com",
+            },
+            License = new OpenApiLicense
+            {
+                Name = "MIT",
+                Url = new Uri("https://opensource.org/licenses/MIT"),
+            },
+
+        }
+    );
+
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 var app = builder.Build();
 
