@@ -71,44 +71,61 @@ public class LocaisController : ControllerBase
         return _mapper.Map<List<LocalResponseDto>>(locais); // Mapeia a lista de locais para DTOs de resposta
     }
 
-
+    /// <summary>
+    /// Mostra todos os locais geográficos cadastrados no formato GeoJSON.
+    /// </summary>
+    /// <returns> Retorna os locais geográficos no formato GeoJson </returns>
+    /// /// <response code="200">Lista a lista com todos os locais geográficos cadastrados.</response>
     [HttpGet("geojson")]
     [Produces("application/geo+json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult> GetLocaisAsGeoJson()
     {
-        var locais = await _dbContext.Locais.AsNoTracking().ToListAsync(); 
+        // Busca todos os locais do banco de dados sem rastreamento
+        var locais = await _dbContext.Locais.AsNoTracking().ToListAsync();
 
-        var featureList = new List<NetTopologySuite.Features.Feature>();
+        // Cria uma lista de features 
+        var featureList = new List<Feature>();
 
+        // Itera sobre cada local e cria uma feature GeoJSON
         foreach (var local in locais)
         {
+
+
+            // Cria uma tabela de atributos para a feature
             var attributes = new AttributesTable();
             attributes.Add("id", local.Id);
             attributes.Add("nome", local.Nome);
             attributes.Add("categoria", local.Categoria.ToString());
 
-            var feature = new NetTopologySuite.Features.Feature(local.Coordenada, attributes); 
+            // Cria uma feature GeoJSON com a coordenada do local e os atributos
+            var feature = new Feature(local.Coordenada, attributes);
 
+            // Adiciona a feature à lista de features
             featureList.Add(feature);
         }
 
-        var featureCollection = new NetTopologySuite.Features.FeatureCollection(); 
+        // Cria uma FeatureCollection e adiciona todas as features
+        var featureCollection = new FeatureCollection(); 
         foreach (var feature in featureList)
         {
             featureCollection.Add(feature); 
         }
 
+        // Configura as opções de serialização para GeoJSON
         var serializerOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase, 
             WriteIndented = true 
         };
 
+        // Adiciona o conversor GeoJsonConverterFactory para serializar corretamente as coordenadas geográficas
         serializerOptions.Converters.Add(new GeoJsonConverterFactory());
 
-        var geoJsonString = JsonSerializer.Serialize(featureCollection, serializerOptions); 
+        // Serializa a FeatureCollection para uma string GeoJSON
+        var geoJsonString = JsonSerializer.Serialize(featureCollection, serializerOptions);
 
+        // Retorna o GeoJSON como conteúdo adequado
         return Content(geoJsonString, "application/geo+json"); 
     }
 
