@@ -69,6 +69,7 @@ public class LocaisController : ControllerBase
         return _mapper.Map<List<LocalResponseDto>>(locais); // Mapeia a lista de locais para DTOs de resposta
     }
 
+
     [HttpGet("geojson")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<FeatureCollection>> GetLocaisGeoJson()
@@ -78,9 +79,8 @@ public class LocaisController : ControllerBase
 
         foreach (var local in locais)
         {
-            // NetTopologySuite.Geometries.Point (local.Coordenada) tem X=Longitude, Y=Latitude
-            // GeoJSON.Text.Geometry.Point e GeoJSON.Text.Geometry.Position construtores esperam (Longitude, Latitude)
-            var position = new GeoJSON.Text.Geometry.Position(local.Coordenada.X, local.Coordenada.Y); // Use GeoJSON.Text.Geometry.Position
+            
+            var position = new GeoJSON.Text.Geometry.Position(local.Coordenada.Y, local.Coordenada.X); // Use GeoJSON.Text.Geometry.Position
             var geoJsonPoint = new GeoJSON.Text.Geometry.Point(position); // Use GeoJSON.Text.Geometry.Point
 
             var properties = new Dictionary<string, object>
