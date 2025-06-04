@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using GeoJSON.Text.Feature;
+using GeoJSON.Text.Geometry;
 using GeoLocations.API.src.DataAccess;
 using GeoLocations.API.src.DTOs;
 using GeoLocations.API.src.Models;
@@ -65,6 +67,37 @@ public class LocaisController : ControllerBase
     {
         var locais = await _dbContext.Locais.ToListAsync(); // Busca todos os locais do banco de dados
         return _mapper.Map<List<LocalResponseDto>>(locais); // Mapeia a lista de locais para DTOs de resposta
+    }
+
+    [HttpGet("geojson")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<FeatureCollection>> GetLocaisGeoJson()
+    {
+        var locais = await _dbContext.Locais.ToListAsync(); // Busca todos os locais do banco de dados
+        var features = new List<GeoJSON.Text.Feature.Feature>();
+
+        foreach (var local in locais)
+        {
+            // NetTopologySuite.Geometries.Point (local.Coordenada) tem X=Longitude, Y=Latitude
+            // GeoJSON.Text.Geometry.Point e GeoJSON.Text.Geometry.Position construtores esperam (Longitude, Latitude)
+            var position = new GeoJSON.Text.Geometry.Position(local.Coordenada.X, local.Coordenada.Y); // Use GeoJSON.Text.Geometry.Position
+            var geoJsonPoint = new GeoJSON.Text.Geometry.Point(position); // Use GeoJSON.Text.Geometry.Point
+
+            var properties = new Dictionary<string, object>
+        {
+            { "id", local.Id },
+            { "nome", local.Nome },
+            { "categoria", local.Categoria.ToString() }
+        };
+
+            // Use GeoJSON.Text.Feature.Feature aqui
+            features.Add(new GeoJSON.Text.Feature.Feature(geoJsonPoint, properties, local.Id.ToString()));
+        }
+
+        // Use GeoJSON.Text.Feature.FeatureCollection aqui
+        var featureCollection = new GeoJSON.Text.Feature.FeatureCollection(features);
+
+        return Ok(featureCollection);
     }
 
     /// <summary>
