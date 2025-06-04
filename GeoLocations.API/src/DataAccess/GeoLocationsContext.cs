@@ -1,6 +1,5 @@
 ﻿using GeoLocations.API.src.Models;
 using Microsoft.EntityFrameworkCore;
-using NetTopologySuite.Geometries;
 
 namespace GeoLocations.API.src.DataAccess;
 

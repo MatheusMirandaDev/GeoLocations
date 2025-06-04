@@ -1,12 +1,8 @@
-using AutoMapper;
 using GeoLocations.API.src.DataAccess;
 using GeoLocations.API.src.Profiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
-using Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite;
 using System.Reflection;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
