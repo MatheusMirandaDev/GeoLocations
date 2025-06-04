@@ -1,5 +1,6 @@
 using GeoLocations.API.src.DataAccess;
 using GeoLocations.API.src.Profiles;
+using GeoLocations.API.src.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -18,6 +19,8 @@ builder.Services.AddDbContext<GeoLocationsContext>(options =>
 );
 
 builder.Services.AddAutoMapper(typeof(LocalProfile));
+
+builder.Services.AddScoped<ILocalService, LocalService>();
 
 // Adiciona os serviços dos controllers (endpoints)
 builder.Services.AddControllers();
