@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
-using GeoJSON.Text.Feature;
-using GeoJSON.Text.Geometry;
 using GeoLocations.API.src.DataAccess;
 using GeoLocations.API.src.DTOs;
 using GeoLocations.API.src.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace GeoLocations.API.src.Controllers;
 
@@ -70,35 +69,12 @@ public class LocaisController : ControllerBase
     }
 
 
-    [HttpGet("geojson")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<FeatureCollection>> GetLocaisGeoJson()
-    {
-        var locais = await _dbContext.Locais.ToListAsync(); // Busca todos os locais do banco de dados
-        var features = new List<GeoJSON.Text.Feature.Feature>();
-
-        foreach (var local in locais)
-        {
-            
-            var position = new GeoJSON.Text.Geometry.Position(local.Coordenada.Y, local.Coordenada.X); // Use GeoJSON.Text.Geometry.Position
-            var geoJsonPoint = new GeoJSON.Text.Geometry.Point(position); // Use GeoJSON.Text.Geometry.Point
-
-            var properties = new Dictionary<string, object>
-        {
-            { "id", local.Id },
-            { "nome", local.Nome },
-            { "categoria", local.Categoria.ToString() }
-        };
-
-            // Use GeoJSON.Text.Feature.Feature aqui
-            features.Add(new GeoJSON.Text.Feature.Feature(geoJsonPoint, properties, local.Id.ToString()));
-        }
-
-        // Use GeoJSON.Text.Feature.FeatureCollection aqui
-        var featureCollection = new GeoJSON.Text.Feature.FeatureCollection(features);
-
-        return Ok(featureCollection);
-    }
+    //[HttpGet("geojson")]
+    //[ProducesResponseType(StatusCodes.Status200OK)]
+    //public async Task<ActionResult> GetLocaisAsGeoJson() 
+    //{
+       
+    //}
 
     /// <summary>
     /// Busca um local geográfico já cadastrado pelo seu ID.
