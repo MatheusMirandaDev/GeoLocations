@@ -1,13 +1,6 @@
-﻿using AutoMapper;
-using GeoLocations.API.src.DataAccess;
-using GeoLocations.API.src.DTOs;
-using GeoLocations.API.src.Models;
+﻿using GeoLocations.API.src.DTOs;
+using GeoLocations.API.src.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NetTopologySuite.Features;
-using NetTopologySuite.IO.Converters;
-using System.Text.Json;
-
 
 namespace GeoLocations.API.src.Controllers;
 
@@ -18,18 +11,15 @@ namespace GeoLocations.API.src.Controllers;
 [Route("api/[controller]")]
 public class LocaisController : ControllerBase
 {
-    private readonly GeoLocationsContext _dbContext; // Contexto do banco de dados
-    private readonly IMapper _mapper; // Mapeador de objetos para DTOs
+    private readonly ILocalService _localService;
 
     /// <summary>
     /// Construtor do controlador.
     /// </summary>
-    /// <param name="dbContext">Contexto do banco de dados.</param>
-    /// <param name="mapper">Mapeador de objetos para DTOs.</param>
-    public LocaisController(GeoLocationsContext dbContext, IMapper mapper)
+    /// <param name="localService">Contexto da camada de serviço</param>
+    public LocaisController(ILocalService localService)
     {
-        _dbContext = dbContext;
-        _mapper = mapper;
+        _localService = localService;
     }
 
     /// <summary>
@@ -39,23 +29,29 @@ public class LocaisController : ControllerBase
     /// <returns>Retorna o local criado</returns>
     /// <response code="201">Local criado com sucesso e retornado no corpo da resposta.</response>
     /// <response code="400">Erro ao tentar criar, dados inválidos.</response>
+    /// <response code="500">Erro interno inesperado no servidor.</response>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateLocal([FromBody] CreateLocalDto localDto)
     {
-        var local = _mapper.Map<Local>(localDto); // Mapeia o DTO para a entidade Local
-        await _dbContext.Locais.AddAsync(local); // Adiciona o local ao contexto do banco de dados
-        await _dbContext.SaveChangesAsync(); // Salva as alterações no banco de dados
+        try
+        {
+            // Chama o serviço para criar o local geográfico
+            var responseDto = await _localService.CreateLocal(localDto);
 
-        var responseDto = _mapper.Map<LocalResponseDto>(local);
-
-        // Retorna o local criado com o status 201 Created e a localização do novo recurso
-        return CreatedAtAction(
-            nameof(GetLocalById),
-            new { id = responseDto.Id },
-            responseDto
-        );
+            // Retorna o local criado com o status 201 Created e a localização do novo recurso
+            return CreatedAtAction(
+                nameof(GetLocalById),
+                new { id = responseDto.Id },
+                responseDto
+            );
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro inesperado ao criar o local.");
+        }
     }
 
     /// <summary>
@@ -63,12 +59,22 @@ public class LocaisController : ControllerBase
     /// </summary>
     /// <returns>Retorna todos os locais geográficos cadastrados </returns>
     /// <response code="200">Lista a lista com todos os locais geográficos cadastrados.</response>
+    /// <response code="500">Erro interno inesperado no servidor.</response>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<LocalResponseDto>>> GetAllLocais()
     {
-        var locais = await _dbContext.Locais.ToListAsync(); // Busca todos os locais do banco de dados
-        return _mapper.Map<List<LocalResponseDto>>(locais); // Mapeia a lista de locais para DTOs de resposta
+        try
+        {
+            // Chama o serviço para obter todos os locais geográficos   
+            return Ok(await _localService.GetAllLocais()); 
+        }
+        catch(Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro inesperado ao listar os locais.");
+        }
+
     }
 
     /// <summary>
@@ -76,57 +82,22 @@ public class LocaisController : ControllerBase
     /// </summary>
     /// <returns> Retorna os locais geográficos no formato GeoJson </returns>
     /// /// <response code="200">Lista a lista com todos os locais geográficos cadastrados.</response>
+    /// <response code="500">Erro interno inesperado no servidor.</response>
     [HttpGet("geojson")]
     [Produces("application/geo+json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> GetLocaisAsGeoJson()
     {
-        // Busca todos os locais do banco de dados sem rastreamento
-        var locais = await _dbContext.Locais.AsNoTracking().ToListAsync();
-
-        // Cria uma lista de features 
-        var featureList = new List<Feature>();
-
-        // Itera sobre cada local e cria uma feature GeoJSON
-        foreach (var local in locais)
+        try
         {
-
-
-            // Cria uma tabela de atributos para a feature
-            var attributes = new AttributesTable();
-            attributes.Add("id", local.Id);
-            attributes.Add("nome", local.Nome);
-            attributes.Add("categoria", local.Categoria.ToString());
-
-            // Cria uma feature GeoJSON com a coordenada do local e os atributos
-            var feature = new Feature(local.Coordenada, attributes);
-
-            // Adiciona a feature à lista de features
-            featureList.Add(feature);
+            // Chama o serviço para obter os locais geográficos no formato GeoJSON
+            return Content(await _localService.GetLocaisAsGeoJson(), "application/geo+json");
         }
-
-        // Cria uma FeatureCollection e adiciona todas as features
-        var featureCollection = new FeatureCollection(); 
-        foreach (var feature in featureList)
+        catch(Exception ex)
         {
-            featureCollection.Add(feature); 
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro inesperado ao listar os locais.");
         }
-
-        // Configura as opções de serialização para GeoJSON
-        var serializerOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase, 
-            WriteIndented = true 
-        };
-
-        // Adiciona o conversor GeoJsonConverterFactory para serializar corretamente as coordenadas geográficas
-        serializerOptions.Converters.Add(new GeoJsonConverterFactory());
-
-        // Serializa a FeatureCollection para uma string GeoJSON
-        var geoJsonString = JsonSerializer.Serialize(featureCollection, serializerOptions);
-
-        // Retorna o GeoJSON como conteúdo adequado
-        return Content(geoJsonString, "application/geo+json"); 
     }
 
     /// <summary>
@@ -136,19 +107,26 @@ public class LocaisController : ControllerBase
     /// <returns> Retorna o local geografico referente ao ID</returns>
     /// <response code="200">Local encontrado com sucesso e retornado no corpo da resposta.</response>
     /// <response code="404">Local não encontrado</response>
+    /// <response code="500">Erro interno inesperado no servidor.</response>
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<LocalResponseDto>> GetLocalById(int id)
     {
-        var local = await _dbContext.Locais.AsNoTracking() // Desabilita o rastreamento de alterações para melhorar a performance
-            .FirstOrDefaultAsync(l => l.Id == id); // Busca o local pelo ID no banco de dados
-
-        if (local == null) return NotFound();
-
-        var response = _mapper.Map<LocalResponseDto>(local); // Mapeia o local encontrado para o DTO de resposta
-
-        return Ok(response);
+        try
+        {
+            // Chama o serviço para buscar o local geográfico pelo ID
+            return await _localService.GetLocalById(id) switch
+            {
+                LocalResponseDto local => Ok(local), // Retorna o local encontrado com status 200 OK
+                null => NotFound() // Retorna 404 Not Found se o local não for encontrado
+            };
+        }
+        catch(Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro inesperado ao buscar o local.");
+        }
     }
 
     /// <summary>
@@ -160,23 +138,28 @@ public class LocaisController : ControllerBase
     /// <response code="200">Local atualizado com sucesso e retornado no corpo da resposta.</response>
     /// <response code="400">Erro ao tentar atualizar local, dados inválidos.</response>
     /// <response code="404">Local não encontrado</response>
+    /// <response code="500">Erro inesperado ao tentar listar os locais.</response>
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> UpdateLocal(int id, [FromBody] UpdateLocalDto localDto) 
     {
-        // Busca o local pelo ID no banco de dados
-        var local = await _dbContext.Locais.FindAsync(id); 
-
-        if (local == null) return NotFound();
-
-        _mapper.Map(localDto, local); // Mapeia os dados do DTO para a entidade Local existente
-        await _dbContext.SaveChangesAsync(); // Salva as alterações no banco de dados
-        var responseDto = _mapper.Map<LocalResponseDto>(local); // Mapeia o local atualizado para o DTO de resposta
-        return Ok(responseDto);
+        try
+        {
+            var responseDto = await _localService.UpdateLocal(id, localDto);
+            if (responseDto == null)
+            {
+                return NotFound(); // Retorna 404 Not Found se o local não for encontrado
+            }
+            return Ok(responseDto); // Retorna o local atualizado com status 200 OK
+        } 
+        catch(Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro inesperado ao atualizar o local.");
+        }
     }
-
 
     /// <summary>
     /// Exclui um local geográfico existente pelo seu ID.
@@ -185,17 +168,26 @@ public class LocaisController : ControllerBase
     /// <returns>  Retorna um 204 No Content sinalizando que a exclusão foi concluida com sucesso</returns>
     /// <response code="204">Local excluído com sucesso.</response>
     /// <response code="404">Local não encontrado</response>
+    /// <response code="500">Erro interno inesperado no servidor.</response>
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteLocal(int id)
     {
-        var local = await _dbContext.Locais.FindAsync(id);
-
-        if (local == null) return NotFound();
-
-        _dbContext.Locais.Remove(local); // Remove o local do contexto do banco de dados
-        await _dbContext.SaveChangesAsync(); // Salva as alterações no banco de dados
-        return NoContent(); // Retorna 204 No Content indicando que a operação foi bem-sucedida, mas não há conteúdo para retornar
+        try
+        {   
+            // Chama o serviço para excluir o local geográfico
+            var success = await _localService.DeleteLocal(id);
+            if (!success)
+            {
+                return NotFound(); // Retorna 404 Not Found se o local não for encontrado
+            }
+            return NoContent(); // Retorna 204 No Content se a exclusão for bem-sucedida
+        }
+        catch (Exception ex) 
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro inesperado.");
+        }
     }
 }
