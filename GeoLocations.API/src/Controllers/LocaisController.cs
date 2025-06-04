@@ -4,6 +4,9 @@ using GeoLocations.API.src.DTOs;
 using GeoLocations.API.src.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Features;
+using NetTopologySuite.IO.Converters;
+using System.Text.Json;
 
 
 namespace GeoLocations.API.src.Controllers;
@@ -69,12 +72,45 @@ public class LocaisController : ControllerBase
     }
 
 
-    //[HttpGet("geojson")]
-    //[ProducesResponseType(StatusCodes.Status200OK)]
-    //public async Task<ActionResult> GetLocaisAsGeoJson() 
-    //{
-       
-    //}
+    [HttpGet("geojson")]
+    [Produces("application/geo+json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetLocaisAsGeoJson()
+    {
+        var locais = await _dbContext.Locais.AsNoTracking().ToListAsync(); 
+
+        var featureList = new List<NetTopologySuite.Features.Feature>();
+
+        foreach (var local in locais)
+        {
+            var attributes = new AttributesTable();
+            attributes.Add("id", local.Id);
+            attributes.Add("nome", local.Nome);
+            attributes.Add("categoria", local.Categoria.ToString());
+
+            var feature = new NetTopologySuite.Features.Feature(local.Coordenada, attributes); 
+
+            featureList.Add(feature);
+        }
+
+        var featureCollection = new NetTopologySuite.Features.FeatureCollection(); 
+        foreach (var feature in featureList)
+        {
+            featureCollection.Add(feature); 
+        }
+
+        var serializerOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase, 
+            WriteIndented = true 
+        };
+
+        serializerOptions.Converters.Add(new GeoJsonConverterFactory());
+
+        var geoJsonString = JsonSerializer.Serialize(featureCollection, serializerOptions); 
+
+        return Content(geoJsonString, "application/geo+json"); 
+    }
 
     /// <summary>
     /// Busca um local geográfico já cadastrado pelo seu ID.
