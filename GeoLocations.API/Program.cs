@@ -69,6 +69,13 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+// Verifica se o banco de dados foi criado e aplica as migrations pendentes
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<GeoLocationsContext>();
+    dbContext.Database.Migrate();
+}
+
 // Configura o middleware do Swagger para uso apenas em ambiente de desenvolvimento
 if (app.Environment.IsDevelopment())
 {
