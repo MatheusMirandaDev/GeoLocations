@@ -129,8 +129,10 @@ Se quiser rodar a API com o .NET SDK e utilizar o banco de dados via Docker:
 3.  **Execute o projeto da API:**
   Ainda na raiz do projeto (`geolocations`):
   ```bash
-    dotnet run --project GeoLocations.API
+    dotnet run --project GeoLocations.API --launch-profile https
   ```
+Isso garante que as configurações do perfil https serão usadas
+
 4.  **Acesse a API:**
   * A API estará disponível em `http://localhost:5168` e `https://localhost:7163`.
   * A documentação do Swagger UI estará disponível em `http://localhost:5168/swagger` ou `https://localhost:7163/swagger`.
