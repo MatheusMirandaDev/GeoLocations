@@ -17,13 +17,7 @@
       retries: 5
 
   api:
-    build:
-      # Se o seu Dockerfile estiver na raiz da solução, e o projeto .csproj em GeoLocations.API/
-      context: . # O diretório onde o docker-compose.yml está (raiz da solução)
-      dockerfile: GeoLocations.API/Dockerfile # Caminho para o Dockerfile a partir do contexto
-      # Se o seu Dockerfile estiver DENTRO da pasta GeoLocations.API:
-      # context: ./GeoLocations.API
-      # dockerfile: Dockerfile
+    image: matheusmirandadev/geolocations-api:1.0.0 # Imagem do serviço API
     ports:
       - "8080:8080" # Mapeia a porta 8080 do host para a porta 8080 do contêiner (HTTP)
     restart: unless-stopped
@@ -32,9 +26,6 @@
       # A string de conexão precisa usar o nome do serviço 'db' como host
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=geoLocations_db;Username=root;Password=root@123" #
       ASPNETCORE_URLS: "http://+:8080" # Garante que o Kestrel escute nas portas corretas dentro do contêiner
-      # Para HTTPS de desenvolvimento dentro do Docker (se você configurou um certificado .pfx):
-      # ASPNETCORE_Kestrel__Certificates__Default__Password: "sua_senha_do_certificado_dev"
-      # ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/aspnetapp.pfx"
     depends_on:
       db: # Garante que o serviço 'db' seja iniciado antes do serviço 'api'
         condition: service_healthy # Opcional, mas recomendado: espera até que o healthcheck do 'db' passe
