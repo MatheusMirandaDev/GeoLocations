@@ -84,6 +84,8 @@ Todos os endpoints estão sob o prefixo `/api/Locais`. Para detalhes completos s
 Esta é a forma mais simples de executar o projeto. O `docker-compose.yml` configura tanto a API quanto o banco de dados com PostGIS, utilizando a imagem publicada no Docker Hub:  
  [matheusmirandadev/geolocations-api](https://hub.docker.com/r/matheusmirandadev/geolocations-api)
 
+ **Importante:** Antes de executar os comandos abaixo, **garanta que o Docker Desktop esteja aberto e completamente inicializado** em seu computador.
+
 #### 1. Clone o repositório:
 
 **Opção A:** Clonar o repositório (com o código fonte completo):
@@ -130,7 +132,7 @@ Se quiser rodar a API com o .NET SDK e utilizar o banco de dados via Docker:
     dotnet run --project GeoLocations.API
   ```
 4.  **Acesse a API:**
-  * A API estará disponível em `http://localhost:5168` e `https://localhost:7163` (ou as portas definidas no seu `GeoLocations.API/Properties/launchSettings.json`).
+  * A API estará disponível em `http://localhost:5168` e `https://localhost:7163`.
   * A documentação do Swagger UI estará disponível em `http://localhost:5168/swagger` ou `https://localhost:7163/swagger`.
 
 ---
