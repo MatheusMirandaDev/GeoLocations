@@ -35,19 +35,19 @@ builder.Services.AddSwaggerGen(options =>
         new OpenApiInfo
         {
             Version = "v1",
-            Title = "API de Gerenciador de Locais Geográficos",
+            Title = "API de Gerenciador de Locais Geograficos",
             Description = """
-                    API REST desenvolvida em .NET 8 (C#) utilizando PostgreSQL com PostGIS via Docker para gerenciar locais geográficos em uma cidade.
+                    API REST desenvolvida em .NET 8 (C#) utilizando PostgreSQL com PostGIS via Docker para gerenciar locais geograficos em uma cidade.
 
                     A API permite:
 
                     - Criar um local informando nome, categoria e coordenadas (latitude/longitude).
-                    - Listar todos os locais cadastrados, além de existir um endpoint para retornar esses locais no formato GeoJSON.
-                    - Buscar um local específico pelo seu ID.
-                    - Atualizar os dados de um local já cadastrado.
-                    - Excluir um local específico pelo seu ID.
+                    - Listar todos os locais cadastrados, alam de existir um endpoint para retornar esses locais no formato GeoJSON.
+                    - Buscar um local especifico pelo seu ID.
+                    - Atualizar os dados de um local ja cadastrado.
+                    - Excluir um local especifico pelo seu ID.
 
-                    As cordenadas são armazenadas no formato Point (SRID 4326) utilizando o NetTopologySuite, que é compatível com o PostgreSQL/PostGIS.
+                    As cordenadas sao armazenadas no formato Point (SRID 4326) utilizando o NetTopologySuite, que e compativel com o PostgreSQL/PostGIS.
                     """,
             Contact = new OpenApiContact
             {
