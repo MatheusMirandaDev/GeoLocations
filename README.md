@@ -33,7 +33,6 @@ A API permite:
 
 As coordenadas são armazenadas no formato `Point` (SRID 4326) utilizando NetTopologySuite, compatível com PostgreSQL/PostGIS.
 
-
 ---
 
 ## 💻 Documentação da API
@@ -45,8 +44,8 @@ Todos os endpoints estão sob o prefixo `/api/Locais`. Para detalhes completos s
     - Corpo da requisição: `CreateLocalDto` (JSON)
         ```json
         {
-          "nome": "Nome do Local (ex: Giraffas)",
-          "categoria": 1, // Ex: Restaurante (veja enum CategoriaLocal)
+          "nome": "Nome do Local", // Ex: "Giraffas"
+          "categoria": 1, // Ex: Restaurante (veja todas opções em: enum CategoriaLocal)
           "latitude": -28.750290, // Intervalo: (-90.00 até 90.00)
           "longitude": -167.623308 // Intervalo: (-180.00 até 180.00)
         }
@@ -59,26 +58,38 @@ Todos os endpoints estão sob o prefixo `/api/Locais`. Para detalhes completos s
     * Corpo da Requisição → `UpdateLocalDto` (JSON)
 * **`DELETE /api/Locais/{id}`** → Exclui um local.
 
+### Categorias de Local (`CategoriaLocal` Enum)
+
+* `0`: Farmácia
+* `1`: Restaurante
+* `2`: Hospital
+* `3`: Supermercado
+* `4`: Posto de Combustível
+* `5`: Escola
+* `6`: Parque
+* `7`: Shopping
+* `8`: Outro
+
 ---
 
 ## 🚀 Como executar
 
 ### ⚙️ Pré-requisitos
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
--  [Docker Desktop](https://www.docker.com/products/docker-desktop/) (ou Docker Engine e Docker Compose CLI)
--  Um cliente Git para clonar o repositório (ex: [Git SCM](https://git-scm.com/downloads))
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (ou Docker Engine e Docker Compose CLI)
+- Um cliente Git para clonar o repositório (ex: [Git SCM](https://git-scm.com/downloads))
 
 ### 🐳 Execução com Docker Compose (Recomendado)
 
 Esta é a forma mais simples de executar o projeto. O `docker-compose.yml` configura tanto a API quanto o banco de dados com PostGIS, utilizando a imagem publicada no Docker Hub:  
-📦 `matheusmirandadev/geolocations-api:1.0.0`
+ `matheusmirandadev/geolocations-api:1.0.0`
 
 #### 1. Clone o repositório:
 
 **Opção A: Clonar o repositório (com o código fonte completo):**
 ```bash
-git clone https://github.com/matheusmirandadev/geolocations.git
-cd geolocations
+  git clone https://github.com/matheusmirandadev/geolocations.git
+  cd geolocations
 ```
 
 **Opção B: Baixar apenas o `docker-compose.yml`:**
@@ -86,7 +97,7 @@ Você pode baixar apenas este arquivo e colocá-lo em qualquer pasta, desde que 
 
 #### 2. Execute o Docker Compose:
 ```bash
-docker-compose up -d
+  docker-compose up -d
 ```
 
 #### 3. Acesse a API:
@@ -102,15 +113,15 @@ As migrations do Entity Framework Core são aplicadas automaticamente ao iniciar
 Se quiser rodar a API com o .NET SDK e utilizar o banco de dados via Docker:
 
 ```bash
-git clone https://github.com/matheusmirandadev/geolocations.git
-cd geolocations
+  git clone https://github.com/matheusmirandadev/geolocations.git
+  cd geolocations
 ```
 
 Inicie o banco com Docker Compose e execute o projeto com:
 
 ```bash
-docker-compose up -d db
-dotnet run --project GeoLocations.API
+  docker-compose up -d db
+  dotnet run --project GeoLocations.API
 ```
 
 ---
