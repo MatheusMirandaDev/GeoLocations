@@ -99,7 +99,7 @@ Você pode baixar apenas este arquivo e colocá-lo em qualquer pasta.
 
 #### 2. Execute o Docker Compose:
 ```bash
-  docker-compose up -d
+  docker-compose up --build -d
 ```
 
 #### 3. Acesse a API:
