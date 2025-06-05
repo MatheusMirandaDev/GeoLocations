@@ -1,6 +1,4 @@
-﻿version: '3.8'
-
-services:
+﻿services:
   db:
     image: postgis/postgis:16-3.4 # Versão do PostGIS baseada no PostgreSQL 16
     restart: always
@@ -12,6 +10,34 @@ services:
       - "5432:5432" # Mapeia a porta 5432 do host para a porta 5432 do contêiner
     volumes:
       - db_data:/var/lib/postgresql/data # Volume persistente para os dados
+    healthcheck: # Opcional: Adiciona uma verificação de saúde para o banco de dados
+      test: ["CMD-SHELL", "pg_isready -U root -d geoLocations_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      # Se o seu Dockerfile estiver na raiz da solução, e o projeto .csproj em GeoLocations.API/
+      context: . # O diretório onde o docker-compose.yml está (raiz da solução)
+      dockerfile: GeoLocations.API/Dockerfile # Caminho para o Dockerfile a partir do contexto
+      # Se o seu Dockerfile estiver DENTRO da pasta GeoLocations.API:
+      # context: ./GeoLocations.API
+      # dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # Mapeia a porta 8080 do host para a porta 8080 do contêiner (HTTP)
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development # Define o ambiente para Desenvolvimento
+      # A string de conexão precisa usar o nome do serviço 'db' como host
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=geoLocations_db;Username=root;Password=root@123" #
+      ASPNETCORE_URLS: "http://+:8080" # Garante que o Kestrel escute nas portas corretas dentro do contêiner
+      # Para HTTPS de desenvolvimento dentro do Docker (se você configurou um certificado .pfx):
+      # ASPNETCORE_Kestrel__Certificates__Default__Password: "sua_senha_do_certificado_dev"
+      # ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/aspnetapp.pfx"
+    depends_on:
+      db: # Garante que o serviço 'db' seja iniciado antes do serviço 'api'
+        condition: service_healthy # Opcional, mas recomendado: espera até que o healthcheck do 'db' passe
 
 volumes:
-  db_data:
+  db_data: # Define o volume nomeado para persistência dos dados do banco
