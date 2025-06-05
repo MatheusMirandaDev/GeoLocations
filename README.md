@@ -82,7 +82,7 @@ Todos os endpoints estão sob o prefixo `/api/Locais`. Para detalhes completos s
 ### 🐳 Execução com Docker Compose (Recomendado)
 
 Esta é a forma mais simples de executar o projeto. O `docker-compose.yml` configura tanto a API quanto o banco de dados com PostGIS, utilizando a imagem publicada no Docker Hub:  
- `matheusmirandadev/geolocations-api:1.0.0`
+ [matheusmirandadev/geolocations-api](https://hub.docker.com/r/matheusmirandadev/geolocations-api)
 
 #### 1. Clone o repositório:
 
