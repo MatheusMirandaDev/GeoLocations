@@ -13,7 +13,7 @@ public interface ILocalService
     /// </summary>
     /// <param name="localDto">DTO contendo os dados para a criação do novo local.</param>
     /// <returns>Um <see cref="LocalResponseDto"/> DTO responsavel por exibir a resposta do local criado.</returns>
-    /// <exception cref="System.Exception">Lançada se ocorrer um erro inesperado durante a persistência dos dados.</exception>
+    /// <exception cref="Exception">Lançada se ocorrer um erro inesperado durante a persistência dos dados.</exception>
     Task<LocalResponseDto> CreateLocal(CreateLocalDto localDto);
 
     /// <summary>
@@ -41,8 +41,7 @@ public interface ILocalService
     /// <param name="id">O ID do local a ser atualizado.</param>
     /// <param name="localDto">DTO contendo os novos dados para o local.</param>
     /// <returns>Um <see cref="LocalResponseDto"/> representando o local atualizado, ou nulo se o local não for encontrado.</returns>
-    /// <exception cref="NomeLocalDuplicadoException">Lançada se a atualização resultar em um nome que já pertence a outro local.</exception>
-    /// <exception cref="System.Exception">Lançada se ocorrer um erro inesperado durante a persistência dos dados.</exception>
+    /// <exception cref="Exception">Lançada se ocorrer um erro inesperado durante a persistência dos dados.</exception>
     Task<LocalResponseDto?> UpdateLocal(int id, UpdateLocalDto localDto);
 
     /// <summary>
@@ -50,6 +49,6 @@ public interface ILocalService
     /// </summary>
     /// <param name="id">O ID do local a ser excluído.</param>
     /// <returns>Verdadeiro se o local foi excluído com sucesso, falso se o local não foi encontrado.</returns>
-    /// <exception cref="System.Exception">Lançada se ocorrer um erro inesperado durante a exclusão.</exception>
+    /// <exception cref="Exception">Lançada se ocorrer um erro inesperado durante a exclusão.</exception>
     Task<bool> DeleteLocal(int id);
 }
