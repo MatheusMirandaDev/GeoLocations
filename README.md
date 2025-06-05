@@ -1,1 +1,116 @@
-# GeoLocations
+# 🗺️ GeoLocations API
+
+API REST desenvolvida em .NET 8 (C#) com PostgreSQL e extensão PostGIS, containerizada com Docker. Permite o gerenciamento completo de locais geográficos com suporte a coordenadas e categorias.
+
+---
+
+## 📖 Projeto
+API para gerenciamento de dados geográficos, utilizando .NET 8, Entity Framework Core e PostgreSQL com PostGIS. Desenvolvida para ser escalável, com consultas espaciais eficientes. O ambiente roda via Docker para fácil deploy e desenvolvimento.
+
+---
+
+## 📌 Tecnologias Utilizadas
+- **Backend:** .NET 8 (C#)
+- **Banco de Dados:** PostgreSQL com extensão PostGIS
+- **ORM:** Entity Framework Core
+- **Geodados:** NetTopologySuite
+- **Mapeamento de Objetos:** AutoMapper
+- **Documentação da API:** Swagger (OpenAPI)
+- **Containerização:** Docker + Docker Compose
+- **Registro de Imagem Docker:** [Meu Docker Hub](https://hub.docker.com/r/matheusmirandadev/geolocations-api)
+
+---
+
+## 🔗 Funcionalidades
+
+A API permite:
+- Criar um local informando nome, categoria e coordenadas (latitude/longitude).
+- Listar todos os locais cadastrados.
+- Listar todos os locais cadastrados no formato GeoJSON.
+- Buscar um local específico pelo seu ID.
+- Atualizar os dados de um local já cadastrado.
+- Excluir um local específico pelo seu ID.
+
+As coordenadas são armazenadas no formato `Point` (SRID 4326) utilizando NetTopologySuite, compatível com PostgreSQL/PostGIS.
+
+
+---
+
+## 💻 Documentação da API
+Todos os endpoints estão sob o prefixo `/api/Locais`. Para detalhes completos sobre os requests e responses, consulte a documentação Swagger em `/swagger` quando a API estiver em execução.
+
+### 🔹 Endpoints
+
+- **`POST /api/Locais`** → Permite a criação de um local com nome, categoria e coordenadas geográficas.
+    - Corpo da requisição: `CreateLocalDto` (JSON)
+        ```json
+        {
+          "nome": "Nome do Local (ex: Giraffas)",
+          "categoria": 1, // Ex: Restaurante (veja enum CategoriaLocal)
+          "latitude": -28.750290, // Intervalo: (-90.00 até 90.00)
+          "longitude": -167.623308 // Intervalo: (-180.00 até 180.00)
+        }
+        ```
+
+* **`GET /api/Locais`** → Lista todos os locais cadastrados.
+* **`GET /api/Locais/geojson`** → Lista todos os locais cadastrados no formato GeoJSON.
+* **`GET /api/Locais/{id}`** → Busca um local pelo ID.
+* **`PUT /api/Locais/{id}`** → Atualiza um local existente.
+    * Corpo da Requisição → `UpdateLocalDto` (JSON)
+* **`DELETE /api/Locais/{id}`** → Exclui um local.
+
+---
+
+## 🚀 Como executar
+
+### ⚙️ Pré-requisitos
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+-  [Docker Desktop](https://www.docker.com/products/docker-desktop/) (ou Docker Engine e Docker Compose CLI)
+-  Um cliente Git para clonar o repositório (ex: [Git SCM](https://git-scm.com/downloads))
+
+### 🐳 Execução com Docker Compose (Recomendado)
+
+Esta é a forma mais simples de executar o projeto. O `docker-compose.yml` configura tanto a API quanto o banco de dados com PostGIS, utilizando a imagem publicada no Docker Hub:  
+📦 `matheusmirandadev/geolocations-api:1.0.0`
+
+#### 1. Clone o repositório:
+
+**Opção A: Clonar o repositório (com o código fonte completo):**
+```bash
+git clone https://github.com/matheusmirandadev/geolocations.git
+cd geolocations
+```
+
+**Opção B: Baixar apenas o `docker-compose.yml`:**
+Você pode baixar apenas este arquivo e colocá-lo em qualquer pasta, desde que mantenha a imagem:
+
+#### 2. Execute o Docker Compose:
+```bash
+docker-compose up -d
+```
+
+#### 3. Acesse a API:
+- `http://localhost:8080` (API)
+- `http://localhost:8080/swagger` (Swagger UI)
+
+As migrations do Entity Framework Core são aplicadas automaticamente ao iniciar.
+
+---
+
+### 🛠️ Execução Local (API localmente e banco via Docker)
+
+Se quiser rodar a API com o .NET SDK e utilizar o banco de dados via Docker:
+
+```bash
+git clone https://github.com/matheusmirandadev/geolocations.git
+cd geolocations
+```
+
+Inicie o banco com Docker Compose e execute o projeto com:
+
+```bash
+docker-compose up -d db
+dotnet run --project GeoLocations.API
+```
+
+---
