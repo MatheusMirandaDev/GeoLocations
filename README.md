@@ -17,7 +17,7 @@ API para gerenciamento de dados geográficos, utilizando .NET 8, Entity Framewor
 - **Mapeamento de Objetos:** AutoMapper
 - **Documentação da API:** Swagger (OpenAPI)
 - **Containerização:** Docker + Docker Compose
-- **Registro de Imagem Docker:** [Meu Docker Hub](https://hub.docker.com/r/matheusmirandadev/geolocations-api)
+- **Registro de Imagem Docker:** [Docker Hub - matheusmirandadev/geolocations-api](https://hub.docker.com/r/matheusmirandadev/geolocations-api)
 
 ---
 
@@ -76,8 +76,8 @@ Todos os endpoints estão sob o prefixo `/api/Locais`. Para detalhes completos s
 
 Para garantir a qualidade e o correto funcionamento da API, foram realizados os seguintes testes:
 
-* **Testes Manuais da API:** Foram executados testes manuais em todos os endpoints da API utilizando o **Swagger UI** (para exploração e validação rápida) e o **Postman** (para cenários mais complexos e validação de requisições e respostas).
-* **Validação de Persistência de Dados:** Após as operações de criação e atualização via API, a persistência e integridade dos dados no banco de dados **PostgreSQL** foram verificadas diretamente através do **PgAdmin**. Isso assegura que os dados estão sendo salvos corretamente e no formato esperado.
+- **Testes Manuais da API:** Todos os endpoints foram testados manualmente utilizando o Swagger UI (para exploração e validação rápida) e o Postman (para cenários mais complexos, incluindo validação de requisições e respostas).
+- **Validação de Persistência de Dados:** Após operações realizadas pela API, a persistência e integridade dos dados no banco de dados **PostgreSQL** foram verificadas diretamente através do **PgAdmin**, assegurando que os dados fossem salvos corretamente e no formato esperado.
 
 ---
 
